@@ -38,8 +38,8 @@ void Scene::render()
                 uint y = index / width;
 
 				Ray ray = cam->getViewRay(x, y);
-				vec3 color = trace0(ray, 0);
-				//vec3 color = rTrace(ray, 0);
+				//vec3 color = trace0(ray, 0);
+				vec3 color = rTrace(ray, 0);
                 imPtr->setPixelValue(x, y, color);
             }
         }));
@@ -97,7 +97,6 @@ vec3 Scene::rTrace(const Ray& ray, uint rdepth)
 		{
 			Ray reflected(outHit.pos + outHit.normal * shadowRayEps, glm::reflect(ray.direction(), outHit.normal));
 			ConductorMat* mat = static_cast< ConductorMat* > (outHit.mat);
-			vec3 ldir = glm::normalize(lights[0]->pos() - outHit.pos);
 			float cosTheta = dot(-ray.direction(), outHit.normal);
 			
 			//outHit.color += mat->attenuate(cosTheta) * rTrace(reflected, rdepth + 1);
