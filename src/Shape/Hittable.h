@@ -14,6 +14,10 @@ private:
 public:
 	constexpr static float intersectionTestEps = 0.000001f;
 	constexpr static float shadowRayEps = 0.001f;
+	static std::vector< Material* > materials;
+	static std::vector< vec3 > vertices;
+	static std::vector< vec3 > normals;
+	static std::vector< int > indices;
 
 	Hittable() : _id(0) {}
 	AABB bbox;

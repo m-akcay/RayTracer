@@ -54,6 +54,11 @@ inline float ConductorMat::reflectionRatio(float cosTheta)
 
 inline float ConductorMat::reflectionRatio(const vec3& rayDir, const vec3& normal)
 {
+	// float cos = fmin(dot(rayDir, normal), 1.0);
+	// float r0 = (-1 + _refractionIdx) / (1 + _refractionIdx);
+	// r0 *= r0;
+	// return r0 + (1 - r0) * pow((1-cos), 5);
+
 	float dp = glm::clamp(dot(rayDir, normal), -1.0f, 1.0f);
 	float rpar2 = (nSquared_plus_kSquared*dp*dp - 2*_refractionIdx*dp + 1)
 					/

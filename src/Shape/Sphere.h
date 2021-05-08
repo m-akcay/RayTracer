@@ -6,13 +6,15 @@
 class Sphere : public Hittable
 {
 private:
+	const size_t centerIdx;
 	const vec3 center;
 	const float radius;
 	inline void setHitInfo(const Ray& ray, float t, HitInfo& outHit);
 public:
-	Sphere(uint id, const vec3& center, float radius, Material* mat)
+	Sphere(uint id, size_t centerIdx, float radius, Material* mat)
 	:
-	Hittable(id, mat), center(center), radius(radius)
+	Hittable(id, mat), centerIdx(centerIdx), radius(radius), 
+	center(vertices[centerIdx])
 	{ 
 		this->bbox = AABB(center - radius, center + radius);
 	}

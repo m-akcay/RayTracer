@@ -1,41 +1,59 @@
 #ifndef _MESH_H_
 #define _MESH_H_
 
+#include "BVH.h"
 #include "Triangle.h"
 
 class Mesh : public Hittable
 {
 private:
-	const std::vector<Triangle> faces;
+	std::vector< Hittable* > faces;
+	BVH* bvh;
+	inline void createBVH(std::vector< Hittable* >& faces);
 
 public:
-	//BVH* bvh;
-	Mesh(uint id, Material* mat, const std::vector<Triangle>& faces)
+	Mesh(uint id, Material* mat, std::vector< Hittable* >& faces)
 	:
-	Hittable(id, mat),
-	faces(faces)
+	Hittable(id, mat)
 	{ 
-		//bvh =  (BVH*) BVH::construct(faces);
+		createBVH(faces);
 	}
-	//~Mesh() = default;
 
-	inline bool hit(const Ray& ray, HitInfo& outHit);
+	inline ~Mesh() override;
+
+	inline bool hit(const Ray& ray, HitInfo& outHit) override;
 	size_t numOfFaces() { return faces.size(); }
 };
 
-bool Mesh::hit(const Ray& ray, HitInfo& outHit)
+inline bool Mesh::hit(const Ray& ray, HitInfo& outHit) 
 {
-	bool _hit = false;
-	
+	return this->bvh->hit(ray, outHit);
+}
+
+inline void Mesh::createBVH(std::vector< Hittable* >& faces)
+{
+
+	float minX, minY, minZ, maxX, maxY, maxZ;
+	minX = minY = minZ = INFINITY;
+	maxX = maxY = maxZ = -INFINITY;
+	vec3 minP(minX, minY, minZ);
+	vec3 maxP(maxX, maxY, maxZ);
+	AABB base(minP, maxP);
 	for (auto face : faces)
 	{
-		if (face.hit(ray, outHit))
-		{
-			_hit = true;
-		}
+		base.expand(face->bbox);
 	}
 
-	return _hit;
+	this->bbox = base;
+	
+	bvh = static_cast< BVH* > (BVH::construct(faces));
+}
+
+Mesh::~Mesh()
+{
+	// this will be checked
+	for (auto face : faces)
+		delete face;
 }
 
 

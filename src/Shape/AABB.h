@@ -35,7 +35,6 @@ inline AABB::AABB(const vec3& minP, const vec3& maxP)
 };
 
 
-
 inline void AABB::expand(const AABB& bbox) 
 {
     minP.x = fmin(minP.x, bbox.minP.x);

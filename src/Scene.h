@@ -6,6 +6,7 @@
 #include "Light/PointLight.h"
 //#include "Shape/Hittable.h"
 #include "Shape/Triangle.h"
+#include "Shape/SmoothTriangle.h"
 #include "Shape/Mesh.h"
 #include "Shape/Sphere.h"
 #include "Shape/BVH.h"
@@ -25,6 +26,8 @@ private:
 	const std::vector< Camera* > cameras;
 	const std::vector< Material* > materials;
 	const std::vector< vec3 > vertices;
+	const std::vector< vec3 > normals;
+	const std::vector< int > indices;
 	std::vector< Hittable* > objects;
 	const std::vector< PointLight* > lights;
 	BVH* bvh;

@@ -3,8 +3,11 @@
 #include "../Material/ConductorMat.h"
 #include "../Material/DielectricMat.h"
 #include "happly.h"
+#include "../Shape/SmoothTriangle.h"
 #include <sstream>
 
+std::vector< vec3 > Hittable::vertices;
+std::vector< vec3 > Hittable::normals;
 
 Scene* SceneParser::createScene(const string& fileName)
 {
@@ -54,9 +57,11 @@ Scene* SceneParser::createScene(const string& fileName)
 
 	// Parse vertex data
 	readVertices(pRoot, vertices);
+	Hittable::vertices = vertices;
 
 	// // Parse objects
 	readObjects(pRoot, fileName, vertices, materials, objects);
+	
 
 	// // Parse lights
 	readLights(pRoot, lights, ambientLight);
@@ -312,7 +317,7 @@ void SceneParser::readVertices(XMLNode* pRoot, std::vector< vec3 >& out_vertices
 	}
 }
 
-void SceneParser::readObjects(XMLNode* pRoot, const string& fileName, const std::vector< vec3 >& vertices, const std::vector< Material* >& materials, std::vector< Hittable* >& out_objects)
+void SceneParser::readObjects(XMLNode* pRoot, const string& fileName, std::vector< vec3 >& vertices, const std::vector< Material* >& materials, std::vector< Hittable* >& out_objects)
 {
 	XMLElement* pElement = pRoot->FirstChildElement("Objects");
 	XMLError eResult;
@@ -337,7 +342,7 @@ void SceneParser::readObjects(XMLNode* pRoot, const string& fileName, const std:
 		objElement = pObject->FirstChildElement("Radius");
 		eResult = objElement->QueryFloatText(&R);
 
-		out_objects.push_back(new Sphere(id, vertices[cIndex - 1], R, materials[matIndex - 1]));
+		out_objects.push_back(new Sphere(id, cIndex - 1, R, materials[matIndex - 1]));
 
 		pObject = pObject->NextSiblingElement("Sphere");
 	}
@@ -362,6 +367,8 @@ void SceneParser::readObjects(XMLNode* pRoot, const string& fileName, const std:
 		out_objects.push_back(new Triangle(id, materials[matIndex - 1], 
 								vertices[p1Index - 1], vertices[p2Index - 1], vertices[p3Index - 1]));
 
+		//out_objects.push_back(new SmoothTriangle(id, materials[matIndex - 1], p1Index - 1, p2Index - 1, p3Index - 1));
+		
 		pObject = pObject->NextSiblingElement("Triangle");
 	}
 
@@ -380,32 +387,79 @@ void SceneParser::readObjects(XMLNode* pRoot, const string& fileName, const std:
 		float minx, miny, minz, maxx, maxy, maxz;
 		minx = miny = minz = INFINITY;
 		maxx = maxy = maxz = -INFINITY;
+		
+		bool smoothShading = false;
 
 		eResult = pObject->QueryIntAttribute("id", &id);
+		eResult = pObject->QueryStringAttribute("shadingMode", &str);
+		if (eResult == XMLError::XML_SUCCESS)
+		{
+			string shadingMode(str);
+			if (shadingMode == "smooth")
+				smoothShading = true;
+		}
 		objElement = pObject->FirstChildElement("Material");
 		eResult = objElement->QueryIntText(&matIndex);
 		objElement = pObject->FirstChildElement("Faces");
 		eResult = objElement->QueryStringAttribute("plyFile", &ply);
 		
-		
+		/*
+		Hittable::normals = std::vector< vec3 >(vertices.size(), vec3(0.0f));
+	std::vector< size_t > normalCount(vertices.size(), 0);
+	for (auto obj : objects)
+	{
+		SmoothTriangle* tri = (SmoothTriangle*) obj;
+		if (tri)
+		{
+			vec3 v1, v2, v3;
+			v1 = tri->v1();
+			v2 = tri->v2();
+			v3 = tri->v3();
+			//std::cout << "VERT->" << glm::to_string(v1) << std::endl;
+			vec3 normal = glm::normalize(cross(v2 - v1,
+											v3 - v1));
+			//std::cout << glm::to_string(normal) << std::endl;
+			//std::cout <<  vertices.size() << "  NORMALS_SIZE -> " << Hittable::normals.size() << "  idxes->" << tri->v1idx() << " " << tri->v2idx() << " " << tri->v3idx() << std::endl;
+			Hittable::normals[tri->v1idx()] += normal;
+			Hittable::normals[tri->v2idx()] += normal;
+			Hittable::normals[tri->v3idx()] += normal;
+
+			normalCount[tri->v1idx()]++;
+			normalCount[tri->v2idx()]++;
+			normalCount[tri->v3idx()]++;
+		}
+	}
+	//std::cout << "BURA" <<std::endl;
+	for (size_t i = 0; i < Hittable::normals.size(); i++)
+	{
+		Hittable::normals[i] /= normalCount[i];
+		Hittable::normals[i] = glm::normalize(Hittable::normals[i]);
+	}
+
+	for (auto obj : objects)
+	{
+		SmoothTriangle* tri = (SmoothTriangle*) obj;
+		if (tri)
+		{
+			tri->setNormals();
+			//std::cout << glm::to_string(tri->n1()) << "   " << glm::to_string(tri->n2()) << "   " << glm::to_string(tri->n3()) <<std::endl;
+		}
+	}
+		*/
 		if (eResult == XMLError::XML_SUCCESS)
 		{
-			// vector<string> strings;
-			// istringstream f("denmark;sweden;india;us");
-			// string s;    
-			// while (getline(f, s, ';')) {
-			// 	cout << s << endl;
-			// 	strings.push_back(s);
-			// }
-			//string plyPath = "../" + 
 			std::vector< size_t > indices;
 			std::vector< vec3 > mVertices;
 			std::istringstream stream(fileName);
 			string plyPath;
 			getline(stream, plyPath, '/');
 			plyPath += "/" + string(ply);
-			//std::cout << plyPath << std::endl;
-			parsePly(plyPath.c_str(), materials[matIndex - 1], out_objects);
+
+			// TODO 
+			// if shadingMode is smooth
+			// call smoothParsePly
+
+			parsePly(plyPath.c_str(), materials[matIndex - 1], vertices, out_objects);
 		}
 		else
 		{
@@ -413,13 +467,15 @@ void SceneParser::readObjects(XMLNode* pRoot, const string& fileName, const std:
 			// std::vector< Triangle* > tris;
 			// std::vector< vec3 > normals(vertices.size(), vec3(0.0f));
 			// std::vector< size_t > normalTriCount(vertices.size(), 1); 
-
+			std::vector< Hittable* > tris;
+			
 			objElement->QueryIntAttribute("vertexOffset", &vertexOffset);
 			str = objElement->GetText();
 			while(str[cursor] == ' ' || str[cursor] == '\t' || str[cursor] == '\n')
 				cursor++;
 			while(str[cursor] != '\0')
 			{
+
 				for(int cnt = 0 ; cnt < 3 ; cnt++)
 				{
 					if(cnt == 0)
@@ -435,7 +491,9 @@ void SceneParser::readObjects(XMLNode* pRoot, const string& fileName, const std:
 				}
 
 				Triangle* tri = new Triangle(0, materials[matIndex - 1], p1Index, p2Index, p3Index, vertices[p1Index - 1], vertices[p2Index - 1], vertices[p3Index - 1]);
-				out_objects.push_back(tri);
+				tris.push_back(tri);
+				//out_objects.push_back(new SmoothTriangle(id, materials[matIndex - 1], p1Index - 1, p2Index - 1, p3Index - 1));
+				//out_objects.push_back(tri);
 				//tris.push_back(tri);
 				// normals[p1Index - 1] += tri->normal(); 
 				// normals[p2Index - 1] += tri->normal();
@@ -445,6 +503,8 @@ void SceneParser::readObjects(XMLNode* pRoot, const string& fileName, const std:
 				// normalTriCount[p3Index - 1]++;
 			}	
 			
+			Mesh* mesh = new Mesh(id, materials[matIndex - 1], tris);
+			out_objects.push_back(mesh);
 			// for (size_t i = 0; i < normals.size(); i++)
 			// {
 			// 	normals[i] = normals[i] / (float) normalTriCount[i];
@@ -508,13 +568,13 @@ void SceneParser::readLights(XMLNode* pRoot, std::vector< PointLight* >& out_lig
 }
 
 
-void SceneParser::parsePly(const char* plyPath, Material* mat, std::vector< Hittable* >& out_objects)
+void SceneParser::parsePly(const char* plyPath, Material* mat, std::vector< vec3 >& vertices, std::vector< Hittable* >& out_objects)
 {
 	//size_t startIdx = out_objects.size();
 	//std::vector< Triangle* > tris;
 
 	happly::PLYData plyIn(plyPath);
-	std::vector< vec3 > vertices;
+	//std::vector< vec3 > vertices;
 	
 // Get mesh-style data from the object
 	std::vector<std::array<double, 3>> vPos = plyIn.getVertexPositions();
@@ -524,6 +584,7 @@ void SceneParser::parsePly(const char* plyPath, Material* mat, std::vector< Hitt
 	{
 		//std::cout << v[0] << " " << v[1] << " " << v[2] << std::endl;
 		vertices.push_back(vec3(v[0], v[1], v[2]));
+		Hittable::vertices.push_back(vec3(v[0], v[1], v[2]));
 	}
 
 	// std::vector< vec3 > normals(vertices.size(), vec3(0.0f));
@@ -544,9 +605,10 @@ void SceneParser::parsePly(const char* plyPath, Material* mat, std::vector< Hitt
 		// normals[i[0]] += tri->normal();
 		// normals[i[1]] += tri->normal();
 		// normals[i[2]] += tri->normal();
+				//out_objects.push_back(new SmoothTriangle(0, mat, i[0], i[1], i[2]));
 
 		out_objects.push_back(tri);
-		//tris.push_back(tri);
+		// tris.push_back(tri);
 	}
 
 	//std::cout << fInd.size() << "    " << vertices.size() << std::endl;

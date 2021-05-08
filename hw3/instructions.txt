@@ -1,0 +1,43 @@
+This assignment is focused on adding the following features to your ray tracers:
+
+    transformations,
+    instancing,
+    multisampling,
+    distribution ray tracing.
+
+Transformations are defined as shown by the following example:
+
+<Transformations>
+        <Scaling id="1">1.5 1.5 1</Scaling>
+        <Rotation id="1">20 0 0 1</Rotation>
+        <Translation id="1">1.0 5.001 -14.0</Translation>
+</Transformations>
+
+Later they are referred to inside the Mesh elements as <Transformations>s2 s3 r1 t1</Transformations>. This means apply the transformations in the given order. That is s2 (scaling with id 2) should be applied first, then s3, then r1 (rotation with id 1) and finally t1 (translation with id1).
+
+Instances are defined using the <MeshInstance> element. An example is below:
+
+<MeshInstance id="5" baseMeshId="1" resetTransform="true">
+            <Material>3</Material>
+            <Transformations>r1 t3</Transformations>
+</MeshInstance>
+
+This mesh instance must be a copy of mesh 1 (indicated by baseMeshId). resetTransform determines whether the transformations of this instance must be added on top of the base mesh's transformations or to the original geometry of the mesh (For example if the resetTransform was not defined or was false, you would apply r1 and t3 on top of any existing transformation defined on base mesh 1).
+
+Multisampling is enabled by adding the <NumSamples>N</NumSamples> field to the Camera element (it is a per-camera property). This means you have to send N samples inside each pixel and compute their average as the final pixel color. You are free to use whichever sampling and averaging (i.e. filtering) strategy you prefer. The results I shared are created by using jittered sampling with a simple box filter.
+
+Distribution ray tracing refers to creating various visual effects with very little extra cost over multisampling. The effects we consider are:
+
+    depth of field,
+    glossy reflections (imperfect mirrors),
+    motion blur,
+    area lights.
+
+For depth of field, <ApertureSize> and <FocusDistance> fields are added to the Camera element (see spheres_dof.xml for an example). We assume that there is a flat square lens on the aperture and "ApertureSize" determines the edge length of this square. FocusDistance represents the distance of the objects from the lens that will be in perfect focus. See the XML files and the attached PDF document for more details.
+
+Glossy reflections refer to imperfect mirrors. This is indicated by the presence of the "Roughness" element in the material description (e.g. cornellbox_brushed_metal.xml). Again see the PDF document to understand how to implement it.
+
+Motion blur simulates the blurry appearance of fast moving objects. It is defined for objects using the "MotionBlur" element (e.g. dragon_dynamic.xml). For simplicity motion blur will be assumed to be only for translational movements. MotionBlur element defines a final translation of the object during which the image capture was taking place. We implement this by adding a "time" element to our rays. Again I've tried to explain this concept in the PDF file. Please read it carefully.
+
+Finally, area lights are used to enable soft-shadows. Similar to point lights, these lights are invisible. Your rays cannot intersect with these lights, they just provide illumination. Please refer to the lecture slides and the related PDF document for more information.
+

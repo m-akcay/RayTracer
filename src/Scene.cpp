@@ -97,10 +97,7 @@ vec3 Scene::rTrace(const Ray& ray, uint rdepth)
 		{
 			Ray reflected(outHit.pos + outHit.normal * shadowRayEps, glm::reflect(ray.direction(), outHit.normal));
 			ConductorMat* mat = static_cast< ConductorMat* > (outHit.mat);
-			float cosTheta = dot(-ray.direction(), outHit.normal);
-			
-			//outHit.color += mat->attenuate(cosTheta) * rTrace(reflected, rdepth + 1);
-			outHit.color += mat->attenuate(-ray.direction(), outHit.normal) * rTrace(reflected, rdepth + 1);
+			outHit.color += mat->attenuate(reflected.direction(), outHit.normal) * rTrace(reflected, rdepth + 1);
 		}
 		else if (outHit.mat->mType() == MType::DIELECTRIC)
 		{

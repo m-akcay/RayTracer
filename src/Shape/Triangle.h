@@ -9,6 +9,7 @@ private:
 	const vec3 _v1, _v2, _v3;
 	vec3 _normal;
 	const vec3 v1v2, v1v3;
+	size_t v1idx, v2idx, v3idx;
 
 public:
 	Triangle(uint id, Material* mat,
@@ -24,7 +25,7 @@ public:
 		this->bbox = AABB(minP, maxP);
 	}
 
-	Triangle(uint id, Material* mat, int p1idx, int p2idx, int p3idx,
+	Triangle(uint id, Material* mat, int v1idx, int v2idx, int v3idx,
 			const vec3& v1, const vec3& v2, const vec3& v3)
 			:
 			Hittable(id, mat),
@@ -32,9 +33,9 @@ public:
 			v1v2(v2 - v1), v1v3(v3 - v1),
 			_normal(glm::normalize(cross(v2 - v1, v3 - v1)))
 	{ 
-		this->p1idx = p1idx;
-		this->p2idx = p2idx;
-		this->p3idx = p3idx;
+		this->v1idx = v1idx;
+		this->v2idx = v2idx;
+		this->v3idx = v3idx;
 
 		vec3 minP = glm::min(glm::min(v1, v2), v3);
 		vec3 maxP = glm::max(glm::max(v1, v2), v3);
@@ -42,7 +43,6 @@ public:
 	}
 
 	//~Triangle() = default;
-	int p1idx, p2idx, p3idx;
 	const vec3& v1() { return _v1; }
 	const vec3& v2() { return _v2; }
 	const vec3& v3() { return _v3; }

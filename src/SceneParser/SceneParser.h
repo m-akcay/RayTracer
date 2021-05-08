@@ -20,11 +20,11 @@ private:
 	static void readVertices(XMLNode* pRoot, std::vector< vec3 >& outVal_vertices);
 	static void readObjects(XMLNode* pRoot, 
 							const string& fileName, 
-							const std::vector< vec3 >& vertices, 
+							std::vector< vec3 >& vertices, 
 							const std::vector< Material* >& materials, 
 							std::vector< Hittable* >& out_objects);
 	static void readLights(XMLNode* pRoot, std::vector< PointLight* >& out_lights, vec3& out_ambientLight);
-	static void parsePly(const char* plyPath, Material* mat, std::vector< Hittable* >& out_objects);
+	static void parsePly(const char* plyPath, Material* mat, std::vector< vec3 >& vertices, std::vector< Hittable* >& out_objects);
 public:
 	static Scene* createScene(const string& fileName); 
 };
