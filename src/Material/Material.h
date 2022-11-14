@@ -27,22 +27,21 @@ public:
 	const vec3& ambientRef() const { return _ambientRef; }
 	const MType mType() { return _mType; }
 
-	virtual inline void attenuate(const Ray& ray, PointLight* light, HitInfo& outHit);
-	virtual inline void attenuate(const Ray& ray, PointLight* light, HitInfo& outHit, Ray& reflectedRay, Ray& refractedRay) {};
+	virtual inline void attenuate(const Ray& ray, Light* light, HitInfo& outHit);
+	virtual inline void attenuate(const Ray& ray, Light* light, HitInfo& outHit, Ray& reflectedRay, Ray& refractedRay) {};
 };
 
 
-void Material::attenuate(const Ray& ray, PointLight* light, HitInfo& outHit)
+void Material::attenuate(const Ray& ray, Light* light, HitInfo& outHit)
 {
-	vec3 wi, wo, Ld, Ls, halfVec, wiPlusWo, irradiance;
+	vec3 wi, wo, Ld, Ls, halfVec, wiPlusWo, irradiance, lightPos;
 	float cosTPrime, cosAPrime, distanceToLight;
 
 	wo = -ray.direction();
-	wi = glm::normalize(light->pos() - outHit.pos);
+	wi = light->directionToLight(outHit.pos, lightPos);
 
 	cosTPrime = std::max(0.0f, dot(wi, outHit.normal));
-	distanceToLight = glm::distance(outHit.pos, light->pos());
-	irradiance = light->intensity() / (distanceToLight * distanceToLight);
+	irradiance = light->contribute(outHit.pos, light->pos());
 
 	Ld = this->_diffuseRef * cosTPrime * irradiance;
 
@@ -54,7 +53,7 @@ void Material::attenuate(const Ray& ray, PointLight* light, HitInfo& outHit)
 	Ls = this->_specularRef * powf(cosAPrime, this->_phongExp) * irradiance;
 
 	
-		outHit.color += (Ld + Ls);
+	outHit.color += (Ld + Ls);
 }
 
 #endif

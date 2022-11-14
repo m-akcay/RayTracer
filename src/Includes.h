@@ -4,6 +4,7 @@
 #include <string>
 #include <memory>
 #include <vector>
+#include <random>
 
 #include <algorithm>
 #include <iterator>
@@ -17,6 +18,7 @@
 #include "glm/gtx/string_cast.hpp"
 #include "glm/gtx/vector_angle.hpp"
 #include "glm/gtx/compatibility.hpp"
+#include "glm/gtx/transform.hpp"
 
 typedef std::string string;
 typedef unsigned int uint;
@@ -50,6 +52,40 @@ enum MType
 	DIELECTRIC
 };
 
+enum TransformationType
+{
+	TRANSLATION,
+	SCALING,
+	ROTATION
+};
+
+class Helper
+{
+public:
+	static inline float rand()
+	{
+		static std::uniform_real_distribution<float> distribution(0.0, 1.0);
+		static std::mt19937 generator;
+		return distribution(generator);
+	}
+
+	static inline float rand(float min, float max)
+	{
+		static std::uniform_real_distribution<float> distribution(min, max);
+		static std::mt19937 generator;
+		return distribution(generator);
+	}
+
+	static inline uint minIdx(const vec3& r)
+	{
+		if (fabs(r.x) < fabs(r.y) && fabs(r.x) < fabs(r.z))
+			return 0;
+		else if (fabs(r.y) < fabs(r.z))
+			return 1;
+		else
+			return 2;
+	}
+};
 
 
 class HitInfo

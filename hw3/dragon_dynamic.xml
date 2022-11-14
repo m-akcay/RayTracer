@@ -69,6 +69,7 @@
         <Mesh id="1">
             <Material>1</Material>
             <Transformations>r1 t2</Transformations>
+            <!-- <Transformations>t2</Transformations> -->
             <Faces plyFile="ply/dragon_remeshed.ply" />
             <MotionBlur>10 10 10</MotionBlur>
         </Mesh>

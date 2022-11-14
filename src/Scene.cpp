@@ -1,5 +1,9 @@
 #include "Scene.h"
 
+#include "Shape/Triangle.h"
+#include "Shape/Mesh.h"
+#include "Shape/Sphere.h"
+
 void Scene::render()
 {
 	uint maxNumOfThreads = std::thread::hardware_concurrency();
@@ -36,10 +40,24 @@ void Scene::render()
                     break;
                 uint x = index % width;
                 uint y = index / width;
-
-				Ray ray = cam->getViewRay(x, y);
-				//vec3 color = trace0(ray, 0);
-				vec3 color = rTrace(ray, 0);
+				
+				vec3 color(0.0f);
+				for (size_t i = 0; i < 100; i++)
+				{
+					// Ray ray = cam->getViewRay(x, y);
+					float xOffset = Helper::rand();
+					float yOffset = Helper::rand();
+					//std::cout << "R__" << xOffset << "__L_____" << yOffset << "___END" << std::endl;
+					Ray ray = cam->getViewRay(x, y, xOffset, yOffset);
+					//vec3 color = trace0(ray, 0);
+					vec3 sampleColor = rTrace(ray, 0);
+					color += sampleColor;
+				}
+				//std::cout << "abc_" << x << "_" << y << "_def" << std::endl;
+				color /= 100.0f;
+				// Ray ray = cam->getViewRay(x, y);
+				// //vec3 color = trace0(ray, 0);
+				// vec3 color = rTrace(ray, 0);
                 imPtr->setPixelValue(x, y, color);
             }
         }));
@@ -77,6 +95,7 @@ vec3 Scene::rTrace(const Ray& ray, uint rdepth)
 	HitInfo outHit;
 	bool hit = false;
 
+	//hit = sceneHit(ray, outHit);
 	hit = bvh->hit(ray, outHit);
 
 	if (hit)
@@ -89,8 +108,9 @@ vec3 Scene::rTrace(const Ray& ray, uint rdepth)
 
 		if (outHit.mat->mType() == MType::MIRROR)
 		{
-			Ray reflected(outHit.pos + outHit.normal * shadowRayEps, glm::reflect(ray.direction(), outHit.normal));
 			MirrorMat* mat = static_cast< MirrorMat* > (outHit.mat);
+			vec3 reflectedDir = mat->reflected(ray.direction(), outHit.normal);
+			Ray reflected(outHit.pos + outHit.normal * shadowRayEps, reflectedDir);
 			outHit.color += mat->mirrorRef() * rTrace(reflected, rdepth + 1);
 		}
 		else if (outHit.mat->mType() == MType::CONDUCTOR)
@@ -98,6 +118,9 @@ vec3 Scene::rTrace(const Ray& ray, uint rdepth)
 			Ray reflected(outHit.pos + outHit.normal * shadowRayEps, glm::reflect(ray.direction(), outHit.normal));
 			ConductorMat* mat = static_cast< ConductorMat* > (outHit.mat);
 			outHit.color += mat->attenuate(reflected.direction(), outHit.normal) * rTrace(reflected, rdepth + 1);
+			// will be tried
+			// vec3 hv = glm::normalize(reflected.direction() + outHit.normal);
+			// outHit.color += mat->attenuate(hv, outHit.normal) * rTrace(reflected, rdepth + 1);
 		}
 		else if (outHit.mat->mType() == MType::DIELECTRIC)
 		{
@@ -142,6 +165,20 @@ vec3 Scene::rTrace(const Ray& ray, uint rdepth)
 	else
 		return backgroundColor;
 }
+
+bool Scene::sceneHit(const Ray& ray, HitInfo& outHit)
+{
+	bool isHit = false;
+	float tmin = INFINITY;
+
+	for (auto mesh : Hittable::meshes)
+	{
+		isHit = mesh->hit(ray, outHit);
+	}	
+
+	return isHit;
+}
+
 
 vec3 Scene::trace0(const Ray& ray, uint rdepth)
 {
@@ -671,13 +708,33 @@ vec3 Scene::trace7(const Ray& ray, uint rdepth)
 	return backgroundColor;
 }
 
-bool Scene::inShadow(const HitInfo& hit, const PointLight* light)
+bool Scene::inShadow(const HitInfo& hit, const Light* light)
 {
+	vec3 lightPos;
 	vec3 orig = hit.pos + 0.001f * hit.normal;
-	vec3 dir = glm::normalize(light->pos() - orig);
+	vec3 dir = light->directionToLight(hit.pos, lightPos);
 	Ray sRay(orig, dir);
 	HitInfo shadowHit;
-	float lightTVal = glm::distance(light->pos(), orig);
+	float lightTVal = glm::distance(lightPos, orig);
+	
+	if (bvh->hit(sRay, shadowHit))
+	{
+		if (shadowHit.tVal > 0 && shadowHit.tVal < lightTVal)
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool Scene::inShadow(const HitInfo& hit, const Light* light, const vec3& lightPos)
+{
+	vec3 orig = hit.pos + 0.001f * hit.normal;
+	vec3 dir = glm::normalize(lightPos - hit.pos);
+	Ray sRay(orig, dir);
+	HitInfo shadowHit;
+	float lightTVal = glm::distance(lightPos, orig);
 	
 	if (bvh->hit(sRay, shadowHit))
 	{
