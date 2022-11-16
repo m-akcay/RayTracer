@@ -22,17 +22,10 @@
             <Intensity>50000000 50000000 50000000</Intensity>
         </PointLight>
         <PointLight id="2">
-            <Position>600 -200 200</Position>
-            <Intensity>50000000 50000000 50000000</Intensity>
+            <Position>-600 -200 200</Position>
+            <Intensity>500000000 500000000 500000000</Intensity>
         </PointLight>
     </Lights>
-
-    <Transformations>
-        <Translation id="1">0 0 -44</Translation>
-        <Translation id="2">-60 -60 0</Translation>
-        <Translation id="3">110 110 0</Translation>
-        <Rotation id="1">-53 0 1 0</Rotation>
-    </Transformations>
 
     <VertexData>
         -1000 -1000 -100
@@ -42,7 +35,7 @@
     </VertexData>
 
     <Materials>
-        <Material id="1" type="conductor">
+        <!-- <Material id="1" type="conductor">
             <AmbientReflectance>0 0 0</AmbientReflectance>
             <DiffuseReflectance>0 0 0</DiffuseReflectance>
             <SpecularReflectance>1 0.86 0.57</SpecularReflectance>
@@ -50,6 +43,15 @@
             <MirrorReflectance>1 0.86 0.57</MirrorReflectance>
             <RefractionIndex>0.370</RefractionIndex>
             <AbsorptionIndex>2.820</AbsorptionIndex>
+        </Material> -->
+        <Material id="1" type="dielectric">
+            <AmbientReflectance>0 0 0</AmbientReflectance>
+            <DiffuseReflectance>0 0 0</DiffuseReflectance>
+            <SpecularReflectance>0 0 0</SpecularReflectance>
+<!--            <SpecularReflectance>0.005 0.005 0.005</SpecularReflectance>-->
+           <!-- <PhongExponent>100</PhongExponent> -->
+            <AbsorptionCoefficient>0.05 0.01 0.05</AbsorptionCoefficient>
+            <RefractionIndex>1.55</RefractionIndex>
         </Material>
         <Material id="2" type="mirror">
             <AmbientReflectance>0 0 0</AmbientReflectance>
@@ -63,8 +65,6 @@
     <Objects>
         <Mesh id="1">
             <Material>1</Material>
-            <!-- <Transformations>r1 r2 t1 s1</Transformations> -->
-            <!-- <Transformations>t2</Transformations> -->
             <Faces plyFile="ply/dragon_remeshed.ply" />
         </Mesh>
         <Mesh id="2">

@@ -23,17 +23,8 @@ private:
 							std::vector< vec3 >& vertices, 
 							const std::vector< Material* >& materials, 
 							std::vector< Hittable* >& out_objects);
-	static void readLights(XMLNode* pRoot, std::vector< Light* >& out_lights, vec3& out_ambientLight);
+	static void readLights(XMLNode* pRoot, std::vector< PointLight* >& out_lights, vec3& out_ambientLight);
 	static void parsePly(const char* plyPath, Material* mat, std::vector< vec3 >& vertices, std::vector< Hittable* >& out_objects);
-	static void parsePly(const char* plyPath, Material* mat, std::vector< vec3 >& vertices,
-						std::vector< vec3 >& meshVertices, std::vector< std::vector< size_t > >& indices,
-						 std::vector< Hittable* >& out_objects);
-	static void parsePly(const char* plyPath, Material* mat, std::vector< vec3 >& vertices, 
-						const mat4& transform, std::vector< Hittable* >& out_objects);
-	static void parsePly(const char* plyPath, Material* mat, std::vector< vec3 >& vertices, 
-						std::vector< vec3 >& meshVertices, std::vector< std::vector< size_t > >& indices,
-						const mat4& transform, std::vector< Hittable* >& out_objects);
-	static void readTransformations(XMLNode* pRoot);
 public:
 	static Scene* createScene(const string& fileName); 
 };

@@ -12,23 +12,11 @@ private:
 	inline void createBVH(std::vector< Hittable* >& faces);
 
 public:
-	bool isTransformed;
 	Mesh(uint id, Material* mat, std::vector< Hittable* >& faces)
 	:
 	Hittable(id, mat)
 	{ 
-		this->faces = faces;
-		createBVH(this->faces);
-		isTransformed = false;
-	}
-
-	Mesh(uint id, Material* mat, std::vector< Hittable* >& faces, const mat4& transform)
-	:
-	Hittable(id, mat, transform)
-	{
-		this->faces = faces;
-		createBVH(this->faces);
-		isTransformed = true;
+		createBVH(faces);
 	}
 
 	inline ~Mesh() override;

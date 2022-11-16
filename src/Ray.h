@@ -43,22 +43,6 @@ public:
 	{
 		return _origin + t * _direction;
 	}
-
-	Ray operator *(const mat4& transform)
-	{
-		vec3 origin = transform * vec4(this->_origin, 1.0f);
-		vec3 direction = transform * vec4(this->_direction, 1.0f);
-		return Ray(origin, direction);
-	}
-
-	// maybe a mistake
-	// because origin() and direction() is const
-	friend Ray operator *(const mat4& transform, const Ray& ray)
-	{
-		vec3 origin = transform * vec4(ray.origin(), 1.0f);
-		vec3 direction = transform * vec4(ray.direction(), 1.0f);
-		return Ray(origin, direction);
-	}
 	
 	friend std::ostream& operator << (std::ostream& out, const Ray& ray)
 	{

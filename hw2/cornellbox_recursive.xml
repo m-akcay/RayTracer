@@ -61,7 +61,7 @@
             <SpecularReflectance>0 0 0</SpecularReflectance>
 <!--            <SpecularReflectance>0.005 0.005 0.005</SpecularReflectance>-->
            <!-- <PhongExponent>100</PhongExponent> -->
-            <AbsorptionCoefficient>0.1 0.001 0.1</AbsorptionCoefficient>
+            <AbsorptionCoefficient>0.01 0.01 0.01</AbsorptionCoefficient>
             <RefractionIndex>1.55</RefractionIndex>
         </Material>
     </Materials>

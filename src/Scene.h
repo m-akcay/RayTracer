@@ -29,7 +29,7 @@ private:
 	const std::vector< vec3 > normals;
 	const std::vector< int > indices;
 	std::vector< Hittable* > objects;
-	const std::vector< Light* > lights;
+	const std::vector< PointLight* > lights;
 	BVH* bvh;
 	uint rdepth = 0;
 
@@ -39,7 +39,7 @@ public:
 		const std::vector< Material* >& materials,
 		const std::vector< vec3 >& vertices,
 		const std::vector< Hittable* >& objects,
-		const std::vector< Light* >& lights)
+		const std::vector< PointLight* >& lights)
 		:
 		backgroundColor(backgroundColor), ambientLight(ambientLight), shadowRayEps(shadowRayEps), intersectionTestEps(intersectionTestEps),
 		cameras(cameras), materials(materials), vertices(vertices), objects(objects), lights(lights)
@@ -61,10 +61,7 @@ private:
 	vec3 trace6(const Ray& ray, uint rdepth);
 	vec3 trace7(const Ray& ray, uint rdepth);
 	vec3 rTrace(const Ray& ray, uint rdepth);
-
-	bool sceneHit(const Ray& ray, HitInfo& outHit);
-	bool inShadow(const HitInfo& hit, const Light* light);
-	bool inShadow(const HitInfo& hit, const Light* light, const vec3& lightPos);
+	bool inShadow(const HitInfo& hit, const PointLight* light);
 //	Scene();
 };
 

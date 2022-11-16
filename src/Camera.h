@@ -49,7 +49,6 @@ public:
 	const string& imgName() { return imgPlane->name(); }
 
 	inline Ray getViewRay (uint x, uint y) const;
-	inline Ray getViewRay (uint x, uint y, float xOffset, float yOffset) const;
 };
 
 inline Ray Camera::getViewRay (uint x, uint y) const
@@ -60,15 +59,5 @@ inline Ray Camera::getViewRay (uint x, uint y) const
 	vec3 direction = glm::normalize(s - pos);
 	return Ray(this->pos, direction);
 };
-
-inline Ray Camera::getViewRay (uint x, uint y, float xOffset, float yOffset) const
-{
-	float su = (x + xOffset) * rightMinusLeft_over_width;
-	float sv = (y + yOffset) * topMinusBottom_over_height;
-	vec3 s = q + su * u - sv * v;
-	vec3 direction = glm::normalize(s - pos);
-	return Ray(this->pos, direction);
-}
-
 
 #endif
