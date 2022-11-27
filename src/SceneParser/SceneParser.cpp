@@ -406,7 +406,7 @@ void SceneParser::readObjects(XMLNode* pRoot, const string& fileName, std::vecto
 			std::istringstream stream(fileName);
 			string plyPath;
 			getline(stream, plyPath, '/');
-			plyPath += "/" + string(ply);
+			plyPath += "/inputs/" + string(ply);
 
 			// TODO 
 			// if shadingMode is smooth
